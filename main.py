@@ -4,6 +4,8 @@ import shutil
 import torch
 import torch.utils.data
 # import torch.utils.data.distributed
+import torchvision
+import torchvision.models as models
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
