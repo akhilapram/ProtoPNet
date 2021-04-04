@@ -53,42 +53,42 @@ proto_bound_boxes_filename_prefix = 'bb'
 from settings import train_dir, test_dir, train_push_dir, \
                      train_batch_size, test_batch_size, train_push_batch_size
 
-normalize = transforms.Normalize(mean=mean,
-                                 std=std)
+data_transforms = {
+    'train': transforms.Compose([
+        transforms.Resize(224),
+        transforms.RandomResizedCrop(224),
+        #transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ]),
+    'val': transforms.Compose([
+        transforms.Resize(224),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+}
 
-# all datasets
-# train set
-train_dataset = datasets.ImageFolder(
-    train_dir,
-    transforms.Compose([
-        transforms.Resize(size=(img_size, img_size)),
-        transforms.ToTensor(),
-        normalize,
-    ]))
+
+
+image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
+                                          data_transforms[x])
+                  for x in ['train', 'val','test']}
+
 train_loader = torch.utils.data.DataLoader(
-    train_dataset, batch_size=train_batch_size, shuffle=True,
+    image_datasets['train'], batch_size=train_batch_size, shuffle=True,
     num_workers=4, pin_memory=False)
-# push set
-train_push_dataset = datasets.ImageFolder(
-    train_push_dir,
-    transforms.Compose([
-        transforms.Resize(size=(img_size, img_size)),
-        transforms.ToTensor(),
-    ]))
+
 train_push_loader = torch.utils.data.DataLoader(
-    train_push_dataset, batch_size=train_push_batch_size, shuffle=False,
+    image_datasets['train'], batch_size=train_push_batch_size, shuffle=False,
     num_workers=4, pin_memory=False)
-# test set
-test_dataset = datasets.ImageFolder(
-    test_dir,
-    transforms.Compose([
-        transforms.Resize(size=(img_size, img_size)),
-        transforms.ToTensor(),
-        normalize,
-    ]))
+
 test_loader = torch.utils.data.DataLoader(
-    test_dataset, batch_size=test_batch_size, shuffle=False,
-    num_workers=4, pin_memory=False)
+    image_datasets['test'], batch_size=test_batch_size, shuffle=False,
+    num_workers=4, pin_memory=False) #where is test set?? change to val??
+
+
+class_names = image_datasets['train'].classes  ## 0: child, and 1: nonchild
 
 # we should look into distributed sampler more carefully at torch.utils.data.distributed.DistributedSampler(train_dataset)
 log('training set size: {0}'.format(len(train_loader.dataset)))
