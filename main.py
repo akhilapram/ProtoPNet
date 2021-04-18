@@ -70,10 +70,10 @@ data_transforms = {
 }
 
 
-
+data_dir = "/content/drive/My Drive/data_upload_v3/"
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                           data_transforms[x])
-                  for x in ['train', 'val','test']}
+                  for x in ['train', 'test']}
 
 train_loader = torch.utils.data.DataLoader(
     image_datasets['train'], batch_size=train_batch_size, shuffle=True,
